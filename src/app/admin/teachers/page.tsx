@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 
-async function getData () {
+/*async function getData () {
   const res = await fetch(`${process.env.BASE_FETCH_URL}/api/teachers`)
   // The return value is *not* serialized
   // You can return Date, Map, Set, etc.
@@ -13,10 +13,10 @@ async function getData () {
   }
 
   return res.json()
-}
+}*/
 
 const Page = async () => {
-  const teachers = await getData()
+  const teachers: [] = [] // await getData()
 
   return (
 
@@ -32,7 +32,7 @@ const Page = async () => {
       <section>
         <h3>Teachers</h3>
         <ul>
-          {teachers.data.map((teacher: { id: string, username: string, firstName: string, secondName: string }) => (
+          {teachers.map((teacher: { id: string, username: string, firstName: string, secondName: string }) => (
             <li
               key={teacher.id}
             >
