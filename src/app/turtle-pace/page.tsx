@@ -58,6 +58,24 @@ const data: DataType[] = [
     day: 1,
     minutes: 3,
   },
+  {
+    key: '2',
+    isDone: true,
+    day: 2,
+    minutes: 3,
+  },
+  {
+    key: '3',
+    isDone: false,
+    day: 3,
+    minutes: 3,
+  },
+  {
+    key: '4',
+    isDone: false,
+    day: 4,
+    minutes: 3,
+  },
 ]
 
 const onChange = (e: CheckboxChangeEvent) => {
