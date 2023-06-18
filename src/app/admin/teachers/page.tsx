@@ -32,7 +32,7 @@ const Page = async () => {
       <section>
         <h3>Teachers</h3>
         <ul>
-          {teachers.data.map(teacher => (
+          {teachers.data.map((teacher: { id: string, username: string, firstName: string, secondName: string }) => (
             <li
               key={teacher.id}
             >
