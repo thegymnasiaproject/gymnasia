@@ -53,7 +53,7 @@ const Page = () => {
 
     const [form] = Form.useForm();
 
-    const onFinish = (formData: { habitName: string, percentPerDay: number }) => {
+    const onFinish = (formData: { habitName: string, percentPerDay: number, goalInMinutes: number }) => {
         console.log('data: ', formData); // eslint-disable-line
 
 
@@ -101,24 +101,33 @@ const Page = () => {
                         >
                             <Form.Item
                                     name="habitName"
-                                    label="Привычка для практики"
+                                    label="Название привычки для практики"
                                     rules={[
                                         { required: true },
-                                        { type: 'string', warningOnly: true },
                                         { type: 'string', min: 2 },
                                     ]}
                             >
-                                <Input placeholder="input placeholder" />
+                                <Input placeholder="введите название привычки" />
+                            </Form.Item>
+                            <Form.Item
+                                    name="goalInMinutes"
+                                    label="Цель: сколько минут в день практиковать?"
+                                    rules={[
+                                        { required: true },
+                                        { type: 'number' },
+                                    ]}
+                            >
+                                <InputNumber placeholder="число" />
                             </Form.Item>
                             <Form.Item
                                     name="percentPerDay"
                                     label="На сколько процентов в день увеличивать время практики?"
                                     rules={[
                                         { required: true },
-                                        { type: 'number' },
+                                        { type: 'number', min: 1, max: 10 },
                                     ]}
                             >
-                                <InputNumber min={1} max={10} onChange={onChange} />
+                                <InputNumber min={1} max={10} placeholder="число" />
                             </Form.Item>
                             <Form.Item>
                                 <Space>
