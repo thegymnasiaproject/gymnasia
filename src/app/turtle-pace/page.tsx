@@ -21,6 +21,7 @@ interface DataType {
     isDone: boolean;
     day: number;
     minutes: number;
+    percent: number;
 }
 
 const columns: ColumnsType<DataType> = [
@@ -42,11 +43,14 @@ const columns: ColumnsType<DataType> = [
     },
     {
         title: 'Процент',
-        key: 'tags',
-        dataIndex: 'tags',
-        render: (text) => <a>{text}</a>,
+        key: 'percent',
+        dataIndex: 'percent',
+        render: (text) => text + '%',
     },
 ];
+
+const totalDays = 66; // Total days to maintain the habit
+const maxPercent = 100;
 
 const Page = () => {
     const [data, setData] = useState<DataType[]>([]);
@@ -54,35 +58,28 @@ const Page = () => {
     const [form] = Form.useForm();
 
     const onFinish = (formData: { habitName: string, percentPerDay: number, goalInMinutes: number }) => {
-        console.log('data: ', formData); // eslint-disable-line
-
-
-        const totalDays = 66; // Total days to maintain the habit
         const calculatedData: DataType[] = [];
+        let percentPerDay = formData.percentPerDay;
 
         for (let i = 0; i < totalDays; i++) {
+            let incrementInMinutes = Math.ceil((formData.percentPerDay / maxPercent) * formData.goalInMinutes);
+
             calculatedData.push({
-                key: Math.random() + '',
+                key: i + '_key',
                 isDone: false,
                 day: i + 1,
-                minutes: 10, // TODO
+                minutes: Math.min(incrementInMinutes * i, formData.goalInMinutes),
+                percent: Math.min(percentPerDay * i, maxPercent),
             });
         }
 
-        console.log('calculatedData: ', calculatedData); // eslint-disable-line
-
         setData(calculatedData);
-
         message.success('Submit success!');
     };
 
     const onFinishFailed = (formError: {}) => {
         console.log('error: ', formError); // eslint-disable-line
         message.error('Submit failed!');
-    };
-
-    const onChange = (value: number | null) => {
-        console.log('changed', value);
     };
 
     return (
@@ -142,7 +139,7 @@ const Page = () => {
                 </Row>
                 <Row>
                     <Col span={24}>
-                        <Table columns={columns} dataSource={data} />
+                        <Table columns={columns} dataSource={data} pagination={{ pageSize: totalDays }} />
                     </Col>
                 </Row>
             </div>
