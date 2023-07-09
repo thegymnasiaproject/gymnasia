@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Button,
   Checkbox,
@@ -11,28 +11,19 @@ import {
   message,
   Row,
   Space,
-  Tag,
-  Typography,
   Table,
 } from 'antd'
 
-import type { CheckboxChangeEvent } from 'antd/es/checkbox'
 import type { ColumnsType } from 'antd/es/table'
 
 interface DataType {
   key: string;
-  isDone: boolean;
   day: number;
   minutes: number;
+  percent: number;
 }
 
 const columns: ColumnsType<DataType> = [
-  {
-    title: 'Я молодец',
-    dataIndex: 'isDone',
-    key: 'isDone',
-    render: (isDone) => <> <Checkbox checked={isDone}></Checkbox></>,
-  },
   {
     title: 'День',
     dataIndex: 'day',
@@ -45,91 +36,95 @@ const columns: ColumnsType<DataType> = [
   },
   {
     title: 'Процент',
-    key: 'tags',
-    dataIndex: 'tags',
-    render: (text) => <a>{text}</a>,
+    key: 'percent',
+    dataIndex: 'percent',
+    render: (text) => text + '%',
   },
 ]
 
-const data: DataType[] = [
-  {
-    key: '1',
-    isDone: true,
-    day: 1,
-    minutes: 3,
+// rowSelection object indicates the need for row selection
+const rowSelection = {
+  onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
+    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
   },
-  {
-    key: '2',
-    isDone: true,
-    day: 2,
-    minutes: 3,
-  },
-  {
-    key: '3',
-    isDone: false,
-    day: 3,
-    minutes: 3,
-  },
-  {
-    key: '4',
-    isDone: false,
-    day: 4,
-    minutes: 3,
-  },
-]
-
-const onChange = (e: CheckboxChangeEvent) => {
-  console.log(`checked = ${e.target.checked}`)
 }
 
+const totalDays = 66 // Total days to maintain the habit
+const maxPercent = 100
+
 const Page = () => {
+  const [data, setData] = useState<DataType[]>([])
+  const [selectionType, setSelectionType] = useState<'checkbox' | 'radio'>('checkbox')
+
   const [form] = Form.useForm()
 
-  const onFinish = () => {
+  const onFinish = (formData: { habitName: string, percentPerDay: number, goalInMinutes: number }) => {
+    const calculatedData: DataType[] = []
+    let percentPerDay = formData.percentPerDay
+
+    for (let i = 0; i < totalDays; i++) {
+      let incrementInMinutes = Math.ceil((formData.percentPerDay / maxPercent) * formData.goalInMinutes)
+
+      calculatedData.push({
+        key: i + '_key',
+        day: i + 1,
+        minutes: Math.min(incrementInMinutes * i, formData.goalInMinutes),
+        percent: Math.min(percentPerDay * i, maxPercent),
+      })
+    }
+
+    setData(calculatedData)
     message.success('Submit success!')
   }
 
-  const onFinishFailed = () => {
+  const onFinishFailed = (formError: {}) => {
+    console.log('error: ', formError) // eslint-disable-line
     message.error('Submit failed!')
   }
 
-  const onChange = (value: number | null) => {
-    console.log('changed', value)
-  }
-
   return (
-    <div>
+    <div style={{ margin: '0 16px' }}>
       <h2>HABIT BUILDER</h2>
 
       <Row>
-        <Col span={6}>
+        <Col span={24}>
           <Form
             form={form}
             layout="vertical"
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
             autoComplete="off"
+            initialValues={data}
           >
             <Form.Item
-              name="habit"
-              label="Привычка для практики"
+              name="habitName"
+              label="Название привычки для практики"
               rules={[
                 { required: true },
-                { type: 'string', warningOnly: true },
-                { type: 'string', min: 6 },
+                { type: 'string', min: 2 },
               ]}
             >
-              <Input placeholder="input placeholder" />
+              <Input placeholder="введите название привычки" />
             </Form.Item>
             <Form.Item
-              name="hours"
-              label="На сколько процентов в день увеличивать время практики?"
+              name="goalInMinutes"
+              label="Цель: сколько минут в день практиковать?"
               rules={[
                 { required: true },
                 { type: 'number' },
               ]}
             >
-              <InputNumber min={1} max={10} defaultValue={5} onChange={onChange} />
+              <InputNumber placeholder="число" />
+            </Form.Item>
+            <Form.Item
+              name="percentPerDay"
+              label="На сколько процентов в день увеличивать время практики?"
+              rules={[
+                { required: true },
+                { type: 'number', min: 1, max: 10 },
+              ]}
+            >
+              <InputNumber min={1} max={10} placeholder="число" />
             </Form.Item>
             <Form.Item>
               <Space>
@@ -140,8 +135,16 @@ const Page = () => {
             </Form.Item>
           </Form>
         </Col>
-        <Col span={18}>
-          <Table columns={columns} dataSource={data} />
+
+      </Row>
+      <Row>
+        <Col span={24}>
+          <Table
+            rowSelection={rowSelection}
+            columns={columns}
+            dataSource={data}
+            pagination={{ pageSize: totalDays }}
+          />
         </Col>
       </Row>
     </div>
